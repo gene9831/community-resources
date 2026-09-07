@@ -9,8 +9,8 @@ outline: [1, 3]
 ## 环境准备
 
 - 码道 Agent 开发工具。
-- 安装 `opentiny-ai-app-integration` Skill
-  - 安装命令：`npx skills add opentiny/agent-skills --skill opentiny-ai-app-integration`
+- 安装 `opentiny-next-app-integration` Skill
+  - 安装命令：`npx skills add opentiny/agent-skills --skill opentiny-next-app-integration`
 - 已有可正常运行的 Vue `>= 3.5.13` + Vite 业务项目。
 
 本手册使用 [`doc-ai`项目](https://github.com/opentiny/agent-skills/tree/hc-2026/codelabs) 作为示例 Demo。
@@ -36,7 +36,7 @@ outline: [1, 3]
 
 发送如下指令给 Agent
 
-> /opentiny-ai-app-integration 为当前项目添加 TinyRobot Chat。
+> /opentiny-next-app-integration 为当前项目添加 TinyRobot Chat。
 
 Agent 完成代码接入后，根据项目中的 `.env.example`，在本地 `.env` 中填写准备使用的模型 Key，例如：
 
@@ -56,7 +56,7 @@ VITE_ALIYUN_DASHSCOPE_KEY=<你的 Aliyun DashScope API Key>
 
 集成 TinyRobotChat 后发送：
 
-> /opentiny-ai-app-integration 在当前 TinyRobot Chat 中集成 GenUI。
+> /opentiny-next-app-integration 在当前 TinyRobot Chat 中集成 GenUI。
 
 Agent 完成后，在本地 `.env` 中填写 GenUI 服务地址和 Prompt ID：
 
@@ -80,7 +80,7 @@ VITE_GENUI_PROMPT_ID=f6a112c8ac8160211886e5eeffcfd037
 
 发送如下指令给 Agent：
 
-> /opentiny-ai-app-integration 为当前项目接入第三步 WebMCP 与 WebSkills 基础设施。
+> /opentiny-next-app-integration 为当前项目接入第三步 WebMCP 与 WebSkills 基础设施。
 
 Agent 完成后，会把页面通过 `document.modelContext` 注册的工具连接到 TinyRobot，并加载 `src/skills/**/SKILL.md` 中的业务说明。
 
@@ -302,7 +302,7 @@ description: 订单查询技能。当用户需要查询订单列表、订单状�
 如果上述示例代码不满足你的业务需求，可以使用 Agent 生成业务代码，可用提示词如下：
 
 ```text
-/opentiny-ai-app-integration 根据以下已确认的业务定义，为 doc-ai 补充 Step 3 订单工具和 Skill：
+/opentiny-next-app-integration 根据以下已确认的业务定义，为 doc-ai 补充 Step 3 订单工具和 Skill：
 
 - 在 src/views/orders/index.vue 注册 order_query 和 order_detail。
 - order_query 支持按订单号、客户姓名和订单状态查询，并同步页面筛选条件。
@@ -335,7 +335,7 @@ description: 订单查询技能。当用户需要查询订单列表、订单状�
 
 发送如下指令给 Agent：
 
-> /opentiny-ai-app-integration 为当前项目接入 PageTool。
+> /opentiny-next-app-integration 为当前项目接入 PageTool。
 
 Agent 完成后，会接入项目当前版本提供的 PageTool 和 TinyRobot adapter。
 
@@ -485,7 +485,7 @@ Skill 中的目标和动作必须与页面代码一致。提交、删除、发�
 如果上述示例代码不满足你的业务需求，可以使用 Agent 生成业务代码，可用提示词如下：
 
 ```text
-/opentiny-ai-app-integration 根据以下已确认的页面访问范围，为 doc-ai 补充 Step 4 PageTool 业务代码：
+/opentiny-next-app-integration 根据以下已确认的页面访问范围，为 doc-ai 补充 Step 4 PageTool 业务代码：
 
 - 在 src/views/orders/index.vue 添加 orders-page，允许 query。
 - 在订单列表添加 orders-list，允许 navigation，仅用于滚动定位。
