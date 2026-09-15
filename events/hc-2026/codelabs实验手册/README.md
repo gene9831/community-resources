@@ -11,11 +11,11 @@ outline: [1, 3]
 - 码道 Agent 开发工具。
 - 安装 `opentiny-next-app-integration` Skill
   - 安装命令：`npx skills add opentiny/agent-skills --skill opentiny-next-app-integration`
-- 已有可正常运行的 Vue `>= 3.5.13` + Vite 业务项目。
+- Node.js 与 pnpm。
 
-本手册使用 [`doc-ai`项目](https://github.com/opentiny/agent-skills/tree/hc-2026/codelabs) 作为示例 Demo。
+本手册使用 [`codelabs-demo` 项目](https://github.com/opentiny/community-resources/tree/main/events/hc-2026/codelabs-demo) 作为示例 Demo。
 
-`doc-ai` 是一个基于 OpenTiny Vue 的电商管理后台系统，主要提供：
+`codelabs-demo` 是一个基于 OpenTiny Vue 的电商管理后台系统，主要提供：
 
 - 概览大盘，展示销售额、库存量和待处理价保等业务指标；
 - 库存、订单和价保管理，支持新增入库、订单搜索与状态筛选、价保申请与审批等
@@ -25,7 +25,16 @@ outline: [1, 3]
 图例：电商管理系统-库存管理
 ![电商管理系统-库存管理](images/电商管理系统-库存管理.png)
 
-完成本手册的四步实操后，开发者可以在 `doc-ai` 中：
+在 Windows、Linux 或 macOS 终端中执行以下命令，获取并启动示例项目：
+
+```bash
+npx --yes degit opentiny/community-resources/events/hc-2026/codelabs-demo codelabs-demo
+cd codelabs-demo
+pnpm install
+pnpm dev
+```
+
+完成本手册的四步实操后，开发者可以在 `codelabs-demo` 中：
 
 - 打开 TinyRobot 对话框，选择已配置的模型并进行对话；
 - 启用 GenUI，让模型返回结构化、可交互的界面；
@@ -100,14 +109,14 @@ Agent 完成后，会把页面通过 `document.modelContext` 注册的工具连�
 - `inputSchema`：参数名称、类型、必填项和枚举值；
 - `execute`：调用现有业务状态或服务，并返回真实结果。
 
-比如 doc-ai 在 `src/views/orders/index.vue` 中，注册如下两个工具
+比如 `codelabs-demo` 在 `src/views/orders/index.vue` 中，注册如下两个工具
 
 | 工具           | 输入                           | 作用                             |
 | -------------- | ------------------------------ | -------------------------------- |
 | `order_query`  | 可选订单号、客户姓名和订单状态 | 查询订单列表，并同步页面筛选条件 |
 | `order_detail` | 必填完整订单号                 | 查询一条订单的详细信息           |
 
-> 下面示例代码也可以在 [registerTool.ts](https://github.com/opentiny/agent-skills/tree/hc-2026/codelabs/examples/registerTool.ts) 查看
+> 下面示例代码也可以在 [registerTool.ts](https://github.com/opentiny/community-resources/blob/main/events/hc-2026/codelabs-demo/examples/registerTool.ts) 查看
 
 ```ts
 import { onMounted, onUnmounted } from 'vue'
@@ -242,9 +251,9 @@ onUnmounted(() => {
 - 什么情况下选择哪个工具；
 - 如何根据工具的真实返回结果回答用户，以及如何处理参数不足、未找到或执行失败。
 
-比如 doc-ai 新增 `src/skills/orders/SKILL.md`：
+比如 `codelabs-demo` 新增 `src/skills/orders/SKILL.md`：
 
-> 下面示例代码也可以在 [webmcp-skill.md](https://github.com/opentiny/agent-skills/tree/hc-2026/codelabs/examples/webmcp-skill.md) 查看
+> 下面示例代码也可以在 [webmcp-skill.md](https://github.com/opentiny/community-resources/blob/main/events/hc-2026/codelabs-demo/examples/webmcp-skill.md) 查看
 
 ```md
 ---
@@ -302,7 +311,7 @@ description: 订单查询技能。当用户需要查询订单列表、订单状�
 如果上述示例代码不满足你的业务需求，可以使用 Agent 生成业务代码，可用提示词如下：
 
 ```text
-/opentiny-next-app-integration 根据以下已确认的业务定义，为 doc-ai 补充 Step 3 订单工具和 Skill：
+/opentiny-next-app-integration 根据以下已确认的业务定义，为 codelabs-demo 补充 Step 3 订单工具和 Skill：
 
 - 在 src/views/orders/index.vue 注册 order_query 和 order_detail。
 - order_query 支持按订单号、客户姓名和订单状态查询，并同步页面筛选条件。
@@ -360,7 +369,7 @@ PageTool 接入完成后，开发者需要补充两部分代码：
 - `data-page-tool-action`：允许的动作类别，例如 `query` 或 `navigation`；
 - `aria-label`：供 PageTool 和辅助技术识别的可访问名称。
 
-比如给 `doc-ai` 的订单页面增加以下能力：
+比如给 `codelabs-demo` 的订单页面增加以下能力：
 
 | 页面目标            | 允许的动作   | 作用                       |
 | ------------------- | ------------ | -------------------------- |
@@ -459,9 +468,9 @@ PageTool Skill 应说明：
 
 Skill 中的目标和动作必须与页面代码一致。提交、删除、发布、支付等操作必须使用带权限校验和确认机制的专用工具，不能通过 PageTool 或 Skill 开放。
 
-比如 doc-ai 项目，在 `src/skills/orders/SKILL.md` 末尾加入：
+比如 `codelabs-demo` 项目，在 `src/skills/orders/SKILL.md` 末尾加入：
 
-> 下面示例代码也可以在 [pagetool-skill.md](https://github.com/opentiny/agent-skills/tree/hc-2026/codelabs/examples/pagetool-skill.md) 查看
+> 下面示例代码也可以在 [pagetool-skill.md](https://github.com/opentiny/community-resources/blob/main/events/hc-2026/codelabs-demo/examples/pagetool-skill.md) 查看
 
 ```md
 ## PageTool 页面目标
@@ -485,7 +494,7 @@ Skill 中的目标和动作必须与页面代码一致。提交、删除、发�
 如果上述示例代码不满足你的业务需求，可以使用 Agent 生成业务代码，可用提示词如下：
 
 ```text
-/opentiny-next-app-integration 根据以下已确认的页面访问范围，为 doc-ai 补充 Step 4 PageTool 业务代码：
+/opentiny-next-app-integration 根据以下已确认的页面访问范围，为 codelabs-demo 补充 Step 4 PageTool 业务代码：
 
 - 在 src/views/orders/index.vue 添加 orders-page，允许 query。
 - 在订单列表添加 orders-list，允许 navigation，仅用于滚动定位。
