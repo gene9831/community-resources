@@ -8,6 +8,7 @@
 
 - PageTool 只用于上述页面目标的查询、滚动和导航。
 - 查询订单数据并在页面中定位订单时，使用 `order_query` 或 `order_detail`，不使用 PageTool 读取订单数据或操作搜索框。
+- `order_detail` 成功返回页面定位结果后即视为任务完成，不再调用 PageTool 的 `searchTree` 或 `browserState` 重复确认。
 
 ## PageTool 禁止操作
 
