@@ -113,6 +113,9 @@ bubble: {
 
 ```bash
 pnpm add @opentiny/genui-sdk-core@1.3.0 @opentiny/genui-sdk-vue@1.3.0 @opentiny/genui-sdk-materials-vue-opentiny-vue@1.3.0
+
+# OpenTiny 组件运行时所需主题
+pnpm add @opentiny/vue-theme@^3.31.1
 ```
 
 其他版本必须按其公开 API 和兼容关系调整。只在 `.env.example` 中加入服务所需的空占位，不修改真实 `.env`。
