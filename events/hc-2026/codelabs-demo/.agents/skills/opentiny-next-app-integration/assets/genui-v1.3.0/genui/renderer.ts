@@ -4,29 +4,11 @@ import {
   type BubbleContentRendererMatch,
   type BubbleContentRendererProps,
 } from '@opentiny/tiny-robot'
-import { defineAsyncComponent, defineComponent, h, type ComputedRef } from 'vue'
+import { defineAsyncComponent, h, type ComputedRef } from 'vue'
 
-
-const GenuiCard = defineAsyncComponent(async () => {
-  const [{ GenuiRenderer: Renderer }, { default: Provider }] = await Promise.all([
-    import('@opentiny/genui-sdk-vue/renderer'),
-    import('./GenuiProvider.vue'),
-  ])
-
-  return defineComponent({
-    name: 'GenuiCard',
-    props: {
-      content: { type: String, required: true },
-      generating: { type: Boolean, default: false },
-    },
-    setup(props) {
-      return () =>
-        h(Provider, null, {
-          default: () => h(Renderer, { content: props.content, generating: props.generating }),
-        })
-    },
-  })
-})
+const GenuiRenderer = defineAsyncComponent(() =>
+  import('@opentiny/genui-sdk-vue/renderer').then((module) => module.GenuiRenderer),
+)
 
 interface SchemaCardContent {
   type: 'schema-card'
@@ -40,7 +22,7 @@ export function createGenuiRendererMatch(isGenerating: ComputedRef<boolean>): Bu
       const { content } = useMessageContent(props)
       const schemaCard = content.value as SchemaCardContent
 
-      return h(GenuiCard, {
+      return h(GenuiRenderer, {
         content: schemaCard.content,
         generating: isGenerating.value,
       })
