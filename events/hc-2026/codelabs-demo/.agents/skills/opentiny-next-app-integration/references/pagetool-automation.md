@@ -13,7 +13,7 @@
 - 高亮、遮罩以及工具调用完成后的清理配置；
 - 是否提供动作授权、调用前钩子、确认机制和注销 API。
 
-常见公开能力包括 `registerPageAgentTool()`、`getPageAgentToolConfig()`、`setPageAgentToolConfig()`、`buildA11yTree()` 和 `searchA11yTree()`，动作可能包括观察、搜索、点击、滚动、填写、选择或脚本执行。只使用目标版本实际提供的能力。
+常见公开能力包括 `registerPageAgentTool()`、`getPageAgentToolConfig()`、`setPageAgentToolConfig()`、`buildA11yTree()` 和 `searchA11yTree()`，动作可能包括观察、搜索、点击、滚动、悬停、填写、选择、脚本执行或剪贴板访问。只使用目标版本实际提供的能力。
 
 如果点击、填写或选择依赖最近一次语义树返回的临时 ref，动作前先重新观察；页面变化后旧 ref 不再作为可靠定位依据。
 
@@ -61,11 +61,11 @@ SDK 中名为 `whitelist` 的配置不一定代表访问控制。检查其实际
 | 查询 | 页面观察、语义搜索 | 只允许已声明的安全范围；无范围时拒绝或返回不含业务内容的结构化结果 |
 | 导航 | 滚动、点击安全页内目标 | 业务声明目标后允许，动作后重新观察 |
 | 表单 | 填写、选择 | 仅对业务方明确开放并有合同的表单允许 |
-| 副作用 | 脚本执行、提交、删除、外部写入 | 默认拒绝，改用专用业务工具 |
+| 副作用 | 脚本执行、剪贴板访问、提交、删除、外部写入 | 默认拒绝，改用专用业务工具 |
 
 提示词说明不能代替执行层策略。若 SDK 没有原生动作 allowlist 或调用前钩子，TinyRobot adapter 必须在调用真实 descriptor 前校验动作类别和目标声明。
 
-同时收窄模型可见的 PageTool `inputSchema`：根据业务策略替换 `properties.action.enum`，只暴露当前确实可执行的 action。没有开放表单或脚本执行时，不把 `fill`、`select`、`executeJavascript` 提供给模型。schema 用于减少错误生成，adapter 执行前校验仍是最终授权边界。
+同时收窄模型可见的 PageTool `inputSchema`：根据业务策略替换 `properties.action.enum`，只暴露当前确实可执行的 action。没有开放表单时，不把 `fill`、`select` 提供给模型；`executeJavascript` 和 `clipboard` 默认不向模型开放。schema 用于减少错误生成，adapter 执行前校验仍是最终授权边界。
 
 提交、删除、发布、支付或外部系统写入应使用专用业务 WebMCP 工具，在参数和执行层携带稳定业务 ID、权限与确认合同。不能把聊天中出现过确认文字当成已完成权限校验。
 
@@ -81,7 +81,7 @@ SDK 中名为 `whitelist` 的配置不一定代表访问控制。检查其实际
 
 工具未注册、动作未知、目标未声明、ref 过期、SDK 校验失败和浏览器异常应明确反馈。不要吞掉错误、返回空对象或声称页面已经变化。
 
-`page-agent-tool` 是独立 MCP 工具；`browserState`、`searchTree`、`click`、`scroll`、`fill`、`select` 等是它的 action。业务工具名、MCP 工具名、`select_skills` 和 `call_tool` 都不能作为 PageTool action。adapter 的模型可见说明应明确这个调用形状，并使用实际 `listTools` 返回的工具名，不发明额外的嵌套工具。
+`page-agent-tool` 是独立 MCP 工具；`browserState`、`searchTree`、`click`、`scroll`、`hover`、`fill`、`select`、`executeJavascript`、`clipboard` 等是它的 action。业务工具名、MCP 工具名、`select_skills` 和 `call_tool` 都不能作为 PageTool action。adapter 的模型可见说明应明确这个调用形状，并使用实际 `listTools` 返回的工具名，不发明额外的嵌套工具。
 
 观察或搜索成功后保存该次语义树对应的 ref 映射；点击、滚动、填写、选择或页面变化后立即清除旧映射。导航和表单动作必须同时满足：存在最新观察、ref 有效、元素仍连接页面、稳定 target ID 与动作合同匹配。不能只根据数字 index 授权。
 

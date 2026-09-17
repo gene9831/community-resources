@@ -7,13 +7,14 @@ export const PAGE_TOOL_ACTIONS = [
   'fill',
   'select',
   'executeJavascript',
+  'clipboard',
 ] as const
 
 export type PageToolAction = (typeof PAGE_TOOL_ACTIONS)[number]
 export type PageToolActionCategory = 'query' | 'navigation' | 'form' | 'sideEffect' | 'unknown'
 export type PageToolTargetAction = Exclude<
   PageToolAction,
-  'browserState' | 'searchTree' | 'executeJavascript'
+  'browserState' | 'searchTree' | 'executeJavascript' | 'clipboard'
 >
 
 export interface PageToolPolicy {
@@ -46,6 +47,7 @@ const ACTION_CATEGORY_MAP: Readonly<Record<PageToolAction, PageToolActionCategor
   fill: 'form',
   select: 'form',
   executeJavascript: 'sideEffect',
+  clipboard: 'sideEffect',
 }
 
 function isPageToolAction(action: unknown): action is PageToolAction {
@@ -64,7 +66,13 @@ function isTargetAction(action: PageToolAction): action is PageToolTargetAction 
 
 export function getModelVisiblePageToolActions(policy: PageToolPolicy): PageToolAction[] {
   return PAGE_TOOL_ACTIONS.filter((action) => {
-    if (!policy.allowedActions.includes(action) || action === 'executeJavascript') return false
+    if (
+      !policy.allowedActions.includes(action) ||
+      action === 'executeJavascript' ||
+      action === 'clipboard'
+    ) {
+      return false
+    }
     if (!isTargetAction(action)) return true
     return (policy.targets?.[action]?.length ?? 0) > 0
   })
