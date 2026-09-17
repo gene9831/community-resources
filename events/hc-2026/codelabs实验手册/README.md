@@ -114,12 +114,12 @@ Agent 完成后，会把页面通过 `document.modelContext` 注册的工具连�
 | 工具           | 输入                           | 作用                             |
 | -------------- | ------------------------------ | -------------------------------- |
 | `order_query`  | 可选订单号、客户姓名和订单状态 | 查询订单列表，并同步页面筛选条件 |
-| `order_detail` | 必填完整订单号                 | 查询一条订单的详细信息           |
+| `order_detail` | 必填完整订单号                 | 查询详情，并将页面列表定位到该订单 |
 
 > 下面示例代码也可以在 [registerTool.ts](https://github.com/opentiny/community-resources/blob/main/events/hc-2026/codelabs-demo/examples/registerTool.ts) 查看
 
 ```ts
-import { onMounted, onUnmounted } from 'vue'
+import { nextTick, onMounted, onUnmounted } from 'vue'
 
 type OrderQueryInput = {
   orderId?: string
@@ -192,7 +192,7 @@ onMounted(() => {
   modelContext.registerTool(
     {
       name: 'order_detail',
-      description: '根据完整订单号查询订单详情，包括客户、商品、金额、支付方式、状态和时间。',
+      description: '根据完整订单号查询订单详情，并同步筛选页面订单列表。',
       inputSchema: {
         type: 'object',
         properties: {
@@ -209,6 +209,7 @@ onMounted(() => {
 
         filterStatus.value = ''
         searchText.value = order?.id ?? orderId.trim()
+        await nextTick()
 
         if (!order) {
           return {
@@ -225,7 +226,9 @@ onMounted(() => {
 - 总金额：¥${order.totalAmount.toLocaleString()}
 - 支付方式：${order.paymentMethod}
 - 状态：${statusLabelMap[order.status]}
-- 下单时间：${order.createdAt}${order.shippedAt ? `\n- 发货时间：${order.shippedAt}` : ''}`
+- 下单时间：${order.createdAt}${order.shippedAt ? `\n- 发货时间：${order.shippedAt}` : ''}
+
+页面定位：订单列表已筛选到 ${order.id}。`
 
         return {
           content: [{ type: 'text', text }],
@@ -274,7 +277,7 @@ description: 订单查询技能。当用户需要查询订单列表、订单状�
 ## 可用工具
 
 - `order_query`：查询订单列表，支持按订单号、客户姓名和订单状态筛选。
-- `order_detail`：根据完整订单号查询一条订单的详细信息。
+- `order_detail`：根据完整订单号查询详情，并同步筛选页面订单列表。
 
 ## 参数规则
 
@@ -306,6 +309,7 @@ description: 订单查询技能。当用户需要查询订单列表、订单状�
 3. 用户没有提供足够的必填参数时，先向用户询问。
 4. 工具返回未找到时，如实告诉用户，不得补造订单。
 5. 最终回答只能使用工具实际返回的信息。
+6. `order_detail` 已返回页面筛选结果时，无需使用 PageTool 重复确认；其他未完成任务不受此限制。
 ```
 
 如果上述示例代码不满足你的业务需求，可以使用 Agent 生成业务代码，可用提示词如下：
@@ -315,10 +319,10 @@ description: 订单查询技能。当用户需要查询订单列表、订单状�
 
 - 在 src/views/orders/index.vue 注册 order_query 和 order_detail。
 - order_query 支持按订单号、客户姓名和订单状态查询，并同步页面筛选条件。
-- order_detail 根据完整订单号查询订单详情。
+- order_detail 根据完整订单号查询订单详情，同步将页面列表筛选到该订单；工具结果只反馈已经完成的详情查询和页面筛选。
 - 两个工具复用页面现有的 orderList，不创建模拟数据。
 - 工具只在订单管理页面打开期间注册并可调用。
-- 在 src/skills/orders/SKILL.md 中说明工具用途、参数规则、选择条件和失败处理。
+- 在 src/skills/orders/SKILL.md 中说明工具用途、参数规则、选择条件和失败处理；专用工具已返回页面定位结果时，无需使用 PageTool 重复确认，其他未完成任务不受此限制。
 
 实现模板：
 
@@ -483,6 +487,7 @@ Skill 中的目标和动作必须与页面代码一致。提交、删除、发�
 
 - PageTool 只用于上述页面目标的查询、滚动和导航。
 - 查询订单数据并在页面中定位订单时，使用 `order_query` 或 `order_detail`，不使用 PageTool 读取订单数据或操作搜索框。
+- `order_detail` 已返回页面筛选结果时，无需使用 PageTool 重复确认；其他未完成任务不受此限制。
 
 ## PageTool 禁止操作
 
@@ -501,6 +506,7 @@ Skill 中的目标和动作必须与页面代码一致。提交、删除、发�
 - 在 src/App.vue 的“订单管理”导航添加 orders-navigation，允许 navigation。
 - 在 src/skills/orders/SKILL.md 中补充上述页面目标、业务工具边界和禁止操作。
 - PageTool 只负责已声明的页面查询和导航；查询订单数据并在页面中定位订单时，使用 order_query 或 order_detail。
+- order_detail 已返回页面筛选结果时，无需使用 PageTool 重复确认；其他未完成任务不受此限制。
 - 不开放表单填写、脚本执行、提交、删除、发布或支付操作。
 
 只实现上述目标，不新增或推测其他页面目标。
@@ -509,6 +515,7 @@ Skill 中的目标和动作必须与页面代码一致。提交、删除、发�
 ### 使用 PageTool 导航页面
 
 - AI 可以根据一条用户消息，通过 `orders-navigation` 进入订单管理页面，查询订单详情并在页面中定位该订单。
+- 对单个订单查询，预期最短调用链为：PageTool 观察当前页面 → PageTool 点击订单导航 → `order_detail` 查询并定位 → AI 回复，无需使用 PageTool 重复确认。
 
 在非订单页面打开 Chat 应用并输入以下业务提示词，来验证 AI 自动导航能力：
 

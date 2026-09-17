@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted } from 'vue'
+import { nextTick, onMounted, onUnmounted } from 'vue'
 
 type OrderQueryInput = {
   orderId?: string
@@ -71,7 +71,7 @@ onMounted(() => {
   modelContext.registerTool(
     {
       name: 'order_detail',
-      description: '根据完整订单号查询订单详情，包括客户、商品、金额、支付方式、状态和时间。',
+      description: '根据完整订单号查询订单详情，并同步筛选页面订单列表。',
       inputSchema: {
         type: 'object',
         properties: {
@@ -88,6 +88,7 @@ onMounted(() => {
 
         filterStatus.value = ''
         searchText.value = order?.id ?? orderId.trim()
+        await nextTick()
 
         if (!order) {
           return {
@@ -104,7 +105,9 @@ onMounted(() => {
 - 总金额：¥${order.totalAmount.toLocaleString()}
 - 支付方式：${order.paymentMethod}
 - 状态：${statusLabelMap[order.status]}
-- 下单时间：${order.createdAt}${order.shippedAt ? `\n- 发货时间：${order.shippedAt}` : ''}`
+- 下单时间：${order.createdAt}${order.shippedAt ? `\n- 发货时间：${order.shippedAt}` : ''}
+
+页面定位：订单列表已筛选到 ${order.id}。`
 
         return {
           content: [{ type: 'text', text }],
